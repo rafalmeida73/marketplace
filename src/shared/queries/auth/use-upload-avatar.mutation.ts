@@ -6,10 +6,8 @@ export const useUploadAvatarMutation = () => {
   const mutation = useMutation({
     mutationFn: uploadAvatar,
     onSuccess: (response) => {
-      console.log(response)
     },
     onError: (error) => {
-      console.log(error)
       Toast.error('Erro ao fazer upload da foto de perfil')
     },
   })
