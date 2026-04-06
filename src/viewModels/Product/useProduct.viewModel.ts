@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { createElement } from "react";
+import { createElement, useEffect } from "react";
 import { useGetProductCommentsInfiniteQuery } from "../../shared/queries/product/use-get-product-comments-infinite-query";
 import { useGetProductDetails } from "../../shared/queries/product/use-get-product-details";
 import { useBottomSheetStore } from "../../shared/store/bottomsheet-store";
@@ -9,7 +9,10 @@ import { AddToCartSuccessModal } from "./components/AddToCartSuccessModal";
 import { ReviewBottomSheet } from "./components/ReviewBottomSheet";
 import { localNotificationsService } from "../../shared/services/local.notifications.service";
 
-export const useProductViewModel = (productId: number) => {
+export const useProductViewModel = (
+  productId: number,
+  openFeedbackBottomSheet: boolean,
+) => {
   const {
     data: productDetails,
     isLoading,
@@ -92,6 +95,12 @@ export const useProductViewModel = (productId: number) => {
       content: createElement(ReviewBottomSheet, { productId }),
     });
   };
+
+  useEffect(() => {
+    if (openFeedbackBottomSheet) {
+      handleOpenReviewBottomSheet();
+    }
+  }, [openFeedbackBottomSheet, productDetails]);
 
   return {
     isLoading,

@@ -1,15 +1,16 @@
-import { UserInterface } from '../user'
+import { UserInterface } from "../user";
 
 export interface RegisterHttpParams {
-  name: string
-  email: string
-  avatarUrl?: string
-  phone: string
-  password: string
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  phone: string;
+  password: string;
+  notificationToken?: string;
 }
 
 export interface RegisterHttpResponse {
-  user: UserInterface
-  token: string
-  refreshToken: string
+  user: UserInterface;
+  token: string;
+  refreshToken: string;
 }

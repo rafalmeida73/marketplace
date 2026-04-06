@@ -1,13 +1,15 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { colors } from "../../styles/colors";
-
+import { expo } from "../../../app.json";
 const DEFAULT_CHANNEL = "default";
 
 const NOTIFICATION_IDS = {
   CART_REMINDER: "cart-reminder",
   PURCHASE_FEEDBACK: "purchase-feedback",
 };
+
+const DEEP_LINK = `${expo.scheme}://`;
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -29,6 +31,14 @@ const requestPermissions = async (): Promise<boolean> => {
   }
 
   return finalStatus === "granted";
+};
+
+const cancelNotifications = async (notificationId: string) => {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
+  } catch (error) {
+    console.error("[LocalNotifications] - Erro", JSON.stringify(error));
+  }
 };
 
 const setupNotificationChannel = async () => {
@@ -61,13 +71,14 @@ const scheduleCartReminder = async ({
   }
 
   const notification = await Notifications.scheduleNotificationAsync({
-    identifier: NOTIFICATION_IDS.CART_REMINDER,
+    identifier: `${NOTIFICATION_IDS.CART_REMINDER}-${productId}`,
     content: {
       title: "Você esqueceu algo no carrinho!",
       body: `O produto ${productName} está esperando por você. Finalize sua compra agora!`,
       data: {
         type: "cart_reminder",
         productId: String(productId),
+        deepLink: `${DEEP_LINK}cart`,
       },
     },
     trigger: {
@@ -99,6 +110,7 @@ const scheduleFeedbackNotification = async ({
       data: {
         type: "purchase_feedback",
         productId: String(productId),
+        deepLink: `${DEEP_LINK}product/${productId}?openFeedbackBottomSheet=true`,
       },
     },
     trigger: {
@@ -113,4 +125,6 @@ export const localNotificationsService = {
   requestPermissions,
   setupNotificationChannel,
   scheduleFeedbackNotification,
+  cancelNotifications,
+  NOTIFICATION_IDS,
 };

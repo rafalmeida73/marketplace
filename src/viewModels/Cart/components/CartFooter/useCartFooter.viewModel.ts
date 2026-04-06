@@ -26,11 +26,23 @@ export const useCartFooterViewModel = () => {
 
     if (firstProduct) {
       localNotificationsService.scheduleFeedbackNotification({
-        productName: firstProduct.name,
+        delayInMinutes: 60,
         productId: firstProduct.id,
-        delayInMinutes: 30,
+        productName: firstProduct.name,
       });
     }
+
+    products.forEach(({ id, name }, index) => {
+      localNotificationsService.cancelNotifications(
+        `${localNotificationsService.NOTIFICATION_IDS.CART_REMINDER}-${id}`,
+      );
+
+      localNotificationsService.scheduleFeedbackNotification({
+        delayInMinutes: 60 * (index + 1),
+        productId: id,
+        productName: name,
+      });
+    });
 
     clearCart();
     showSuccess({
