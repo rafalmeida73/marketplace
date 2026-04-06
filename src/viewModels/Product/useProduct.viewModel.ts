@@ -1,19 +1,20 @@
-import { router } from 'expo-router'
-import { createElement } from 'react'
-import { useGetProductCommentsInfiniteQuery } from '../../shared/queries/product/use-get-product-comments-infinite-query'
-import { useGetProductDetails } from '../../shared/queries/product/use-get-product-details'
-import { useBottomSheetStore } from '../../shared/store/bottomsheet-store'
-import { useCartStore } from '../../shared/store/cart-store'
-import { useModalStore } from '../../shared/store/modal-store'
-import { AddToCartSuccessModal } from './components/AddToCartSuccessModal'
-import { ReviewBottomSheet } from './components/ReviewBottomSheet'
+import { router } from "expo-router";
+import { createElement } from "react";
+import { useGetProductCommentsInfiniteQuery } from "../../shared/queries/product/use-get-product-comments-infinite-query";
+import { useGetProductDetails } from "../../shared/queries/product/use-get-product-details";
+import { useBottomSheetStore } from "../../shared/store/bottomsheet-store";
+import { useCartStore } from "../../shared/store/cart-store";
+import { useModalStore } from "../../shared/store/modal-store";
+import { AddToCartSuccessModal } from "./components/AddToCartSuccessModal";
+import { ReviewBottomSheet } from "./components/ReviewBottomSheet";
+import { localNotificationsService } from "../../shared/services/local.notifications.service";
 
 export const useProductViewModel = (productId: number) => {
   const {
     data: productDetails,
     isLoading,
     error,
-  } = useGetProductDetails(productId)
+  } = useGetProductDetails(productId);
 
   const {
     comments,
@@ -24,49 +25,55 @@ export const useProductViewModel = (productId: number) => {
     error: errorComments,
     isRefetching,
     isFetchingNextPage,
-  } = useGetProductCommentsInfiniteQuery(productId)
+  } = useGetProductCommentsInfiniteQuery(productId);
 
-  const { addProduct, products } = useCartStore()
+  const { addProduct, products } = useCartStore();
 
-  const { open: openBottomSheet } = useBottomSheetStore()
+  const { open: openBottomSheet } = useBottomSheetStore();
 
-  const { open, close } = useModalStore()
+  const { open, close } = useModalStore();
 
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
+      fetchNextPage();
     }
-  }
+  };
 
   const handleRefetch = () => {
     if (!isRefetching) {
-      refetch()
+      refetch();
     }
-  }
+  };
 
   const handleEndReached = () => {
-    handleLoadMore()
-  }
+    handleLoadMore();
+  };
 
   const onGoToCart = () => {
-    router.push('/(private)/(tabs)/cart')
-    close()
-  }
+    router.push("/(private)/(tabs)/cart");
+    close();
+  };
 
   const onContinueShopping = () => {
-    router.push('/(private)/(tabs)/home')
-    close()
-  }
+    router.push("/(private)/(tabs)/home");
+    close();
+  };
 
   const handleAddToCart = () => {
-    if (!productDetails) return
+    if (!productDetails) return;
 
     addProduct({
       id: productDetails.id,
       name: productDetails.name,
       price: productDetails.value,
       image: productDetails.photo,
-    })
+    });
+
+    localNotificationsService.scheduleCartReminder({
+      productId: productDetails.id,
+      productName: productDetails.name,
+      delayInMinutes: 1,
+    });
 
     open(
       createElement(AddToCartSuccessModal, {
@@ -75,16 +82,16 @@ export const useProductViewModel = (productId: number) => {
         onClose: close,
         onContinueShopping,
       }),
-    )
-  }
+    );
+  };
 
   const handleOpenReviewBottomSheet = () => {
-    if (!productDetails) return
+    if (!productDetails) return;
 
     openBottomSheet({
       content: createElement(ReviewBottomSheet, { productId }),
-    })
-  }
+    });
+  };
 
   return {
     isLoading,
@@ -100,5 +107,5 @@ export const useProductViewModel = (productId: number) => {
     isFetchingNextPage,
     handleAddToCart,
     handleOpenReviewBottomSheet,
-  }
-}
+  };
+};
